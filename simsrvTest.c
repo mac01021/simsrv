@@ -1,5 +1,5 @@
 
-#include "r2d.h"
+#include "simsrv.h"
 
 void *
 makestate() {
@@ -48,11 +48,11 @@ AI(void *identity, char *pixels, float *sensors, char *motor) {
 int
 main() {
 	double S = 0;
-	r2dInit(makestate,
+	simsrvInit(makestate,
 		render, 640, 480, //render at 640 by 480
 		sense, 1,         // 1 floating point sensor
 		evolve, 8,        // 8 bytes of motor control
 		teardown);
-	r2dRunSimulationForAgent(NULL, AI);
-	r2dTerminate();
+	simsrvRunSimulationForAgent(NULL, AI);
+	simsrvTerminate();
 }

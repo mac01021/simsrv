@@ -2,12 +2,13 @@
 
 mkdir target;
 
-clang -o target/r2dTest             \
+####################################
+clang -o target/simsrvTest          \
       -std=c11                       \
                                       \
-      r2dTest.c GLFW/libglfw3.a        \
+      simsrvTest.c GLFW/libglfw3.a     \
                                         \
       -lm -lGL -lX11 -lXxf86vm           \
       -lpthread -lXrandr -lXi             \
-
+###########################################
 
