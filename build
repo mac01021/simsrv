@@ -1,5 +1,7 @@
 #!/bin/sh
 
+. ./clean
+
 mkdir target;
 
 ####################################
@@ -10,5 +12,14 @@ clang -o target/simsrvTest          \
                                         \
       -lm -lGL -lX11 -lXxf86vm           \
       -lpthread -lXrandr -lXi             \
+###########################################
+
+####################################
+clang -o target/r2dTest.o           \
+      -std=c11                       \
+                                      \
+      r2dTest.c                        \
+                                        \
+      -lm -lGL                           \
 ###########################################
 
