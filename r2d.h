@@ -59,15 +59,10 @@ static int32_t r2dMOTOR_SIZE;
 ///////////                 THE TASK     ///////////////////////////////////
 void
 r2dInit(r2dStateFactory stateFactory,
-	r2dDrawFunc drawFunc,
-	r2dSensorFunc sensorFunc,
-	r2dStateUpdateFunc updateFunc,
-	r2dStateDestructor stateDestructor,
-	int32_t screenWidth,
-	int32_t screenHeight,
-	int32_t nvSize,
-	int32_t motorSize,
-	int portno) {
+	r2dDrawFunc drawFunc, int32_t screenWidth, int32_t screenHeight,
+	r2dSensorFunc sensorFunc, int32_t nvSize,
+	r2dStateUpdateFunc updateFunc, int32_t motorSize,
+	r2dStateDestructor stateDestructor) {
 	if (!r2dINITTED) {
 		r2dINITTED = true;
 		r2dINITIAL_STATE_CALLBACK = stateFactory;
@@ -141,7 +136,6 @@ r2dSendSensoryDataOnSocket(int sockfd, void *state) {
 
 void
 r2dReadMotorFromSocket(int sockfd, char *motor) {
-	return NULL;
 	//TODO
 }
 
@@ -167,26 +161,6 @@ r2dRunServedSimulation(int sockfd) {
 	r2dDESTROY_STATE_CALLBACK(s);
 }
 
-void
-r2dRunSimulationForAgent(void *agent, r2dAgentFunc agentFunc) {
-	GLFWwindow *win = r2dCreateWindow();
-	void *s = r2dINITIAL_STATE_CALLBACK();
-	double t = glfwGetTime();
-	double now, deltaT;
-	char pixels[3 * r2dSCREEN_WIDTH * r2dSCREEN_HEIGHT];
-	float sensors[r2dNONVISUAL_SENSOR_SIZE];
-	char motor[r2dMOTOR_SIZE];
-	do {
-		r2dDRAW_CALLBACK(s);
-		glfwSwapBuffers(win);
-		//TODO: call agent
-		now = glfwGetTime();
-		deltaT = now - t;
-		t = now;
-	} while (r2dEVOLVE_CALLBACK(s, deltaT, motor));
-	glfwDestroyWindow(win);
-	r2dDESTROY_STATE_CALLBACK(s);
-}
 
 
 void *
@@ -198,7 +172,8 @@ r2dHandleSocket(void *sockptr) {
 }
 
 
-void r2dListenAndServe(int port) {
+void
+r2dListenAndServe(int port) {
 	struct sockaddr_in srvAddr;
 	int srvSock = socket(AF_INET, SOCK_STREAM, 0);
 	srvAddr.sin_family = AF_INET;
@@ -220,6 +195,40 @@ void r2dListenAndServe(int port) {
 			r2dError(0, "Failed to spawn thread for new world");
 		}
 	}
+}
+
+
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+
+void
+r2dRunSimulationForAgent(void *agent, r2dAgentFunc agentFunc) {
+	GLFWwindow *win = r2dCreateWindow();
+	void *s = r2dINITIAL_STATE_CALLBACK();
+	double t = glfwGetTime();
+	double now, deltaT;
+	char pixels[3 * r2dSCREEN_WIDTH * r2dSCREEN_HEIGHT];
+	float sensors[r2dNONVISUAL_SENSOR_SIZE];
+	char motor[r2dMOTOR_SIZE];
+	do {
+		r2dDRAW_CALLBACK(s);
+		glfwSwapBuffers(win);
+		glReadPixels(0, 0, r2dSCREEN_WIDTH, r2dSCREEN_HEIGHT,
+			     GL_RGB, GL_UNSIGNED_BYTE, pixels);
+		r2dSENSOR_CALLBACK(s, sensors);
+		agentFunc(agent, pixels, sensors, motor);
+		now = glfwGetTime();
+		deltaT = now - t;
+		t = now;
+	} while (r2dEVOLVE_CALLBACK(s, deltaT, motor));
+	glfwDestroyWindow(win);
+	r2dDESTROY_STATE_CALLBACK(s);
 }
 
 

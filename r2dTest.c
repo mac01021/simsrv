@@ -1,34 +1,58 @@
 
 #include "r2d.h"
 
-double *
+void *
 makestate() {
 	double *d = malloc(sizeof(double));
 	*d = 0;
-	return d;
+	return (void *)d;
 }
 
 void
-teardown(double *d) {
-	free(d);
+teardown(void *d) {
+	free((double *)d);
 }
 
 void
-render(double *S) {
-	printf("%f\n", *S);
+sense(void *S, float *dst) {
+	float r = (float)rand();
+	*dst = r/((float)RAND_MAX);
+}
+
+void
+render(void *S) {
+	printf("The state is %f\n", *((double *)S));
 }
 
 bool
-evolve(double *S, double timeElapsed, char *motor) {
-	(*S) += timeElapsed;
+evolve(void *S, double timeElapsed, char *motor) {
+	double *n;
+	n = (double *)S;
+	(*n) += timeElapsed;
+	if (motor[0]) {
+		*n = 0;
+	}
 	return true;
+}
+
+
+void
+AI(void *identity, char *pixels, float *sensors, char *motor) {
+	if (sensors[0] > .99) {
+		motor[0] = 1;
+	} else {
+		motor[0] = 0;
+	}
 }
 
 int
 main() {
 	double S = 0;
-	r2dInit(makestate, render, evolve, teardown, 640, 480, 8, 30303);
-	//r2dWorld world = r2dCreateWorld(false);
-	//r2dRunWorld(&world);
+	r2dInit(makestate,
+		render, 640, 480, //render at 640 by 480
+		sense, 1,         // 1 floating point sensor
+		evolve, 8,        // 8 bytes of motor control
+		teardown);
+	r2dRunSimulationForAgent(NULL, AI);
 	r2dTerminate();
 }
