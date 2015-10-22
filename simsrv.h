@@ -94,6 +94,7 @@ simsrvTerminate() {
 
 GLFWwindow *
 simsrvCreateWindow() {
+	glfwWindowHint(GLFW_RESIZABLE, false);
 	GLFWwindow *win = glfwCreateWindow(simsrvSCREEN_WIDTH,
 					   simsrvSCREEN_HEIGHT,
 					   "simsrvSimulation",
@@ -104,6 +105,17 @@ simsrvCreateWindow() {
 	}
 	glfwMakeContextCurrent(win);
 	glfwSwapInterval(1);
+	int w, h;
+	glfwGetFramebufferSize(win, &w, &h);
+	glViewport(0, 0, w, h);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(0,
+		(GLdouble)simsrvSCREEN_WIDTH,
+		(GLdouble)simsrvSCREEN_HEIGHT,
+		0,
+		-1,
+		1);
 	return win;
 }
 

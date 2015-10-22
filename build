@@ -4,6 +4,7 @@
 
 mkdir target;
 
+printf "Compiling simsrvTest... ";
 ####################################
 clang -o target/simsrvTest          \
       -std=c11                       \
@@ -13,13 +14,35 @@ clang -o target/simsrvTest          \
       -lm -lGL -lX11 -lXxf86vm           \
       -lpthread -lXrandr -lXi             \
 ###########################################
+printf "Done.\n\n";
 
-####################################
-clang -o target/r2dTest.o           \
-      -std=c11                       \
+
+
+printf "Compiling SOIL... ";
+##############################################
+mkdir target/SOIL;                           #
+for file in $(ls SOIL/*.c); do               #
+	clang -c -o target/${file}.o $file   #
+done                                         #
+ar cr target/SOIL.a $(ls target/SOIL/*.o)    #
+##############################################
+printf "Done.\n\n";
+
+
+printf "Compiling r2dTest.o... ";
+##################################
+clang -o target/r2dTest           \
+      -std=c11                     \
+                                    \
+      r2dTest.c                      \
                                       \
-      r2dTest.c                        \
-                                        \
-      -lm -lGL                           \
-###########################################
+      GLFW/libglfw3.a                  \
+      target/SOIL.a                     \
+                                         \
+      -lm -lGL -lX11 -lXxf86vm            \
+      -lpthread -lXrandr -lXi              \
+############################################
+printf "Done.\n\n";
 
+printf "./target contains:\n";
+ls -1 target;
